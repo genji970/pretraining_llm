@@ -1,7 +1,5 @@
 # From-scratch LLM pretraining
 
-Colab notebook code를 VS Code에서 실행 가능한 패키지형 프로젝트로 분리한 버전입니다. 현재는 pretraining만 구현하며, 이후 `src/training/sft/`, `src/training/ppo/`를 같은 수준에 추가할 수 있습니다.
-
 ## 구조
 
 ```text
