@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Pretraining",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/pretraining.py",
+      "console": "integratedTerminal",
+      "args": ["--train-path", "data/raw/train.jsonl"]
+    },
+    {
+      "name": "Current module",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "${input:moduleName}",
+      "console": "integratedTerminal"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "moduleName",
+      "type": "promptString",
+      "description": "Example: training.pre_training.model.attention"
+    }
+  ]
+}
