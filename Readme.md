@@ -1,126 +1,99 @@
-# From-scratch LLM pretraining
+# Modular decoder-only pretraining
 
-## 구조
+The original notebook modules were separated by function and connected with a
+single immutable `argparse` configuration. The default public corpus is the
+English `wikimedia/wikipedia` subset `20231101.en`, loaded in streaming mode and
+bounded by `--max_samples`.
+
+## Structure
 
 ```text
-.
-├── artifacts/                         # tokenizer와 checkpoint 출력
+llm_pretraining_modular/
+├── config.py               # the only argparse definition
+├── main.py                 # wiring only
 ├── data/
-│   ├── raw/                           # 원본 데이터
-│   └── process/                       # 정규화된 학습 데이터
-├── scripts/
-│   └── pretraining.py                 # 유일한 전체 실행 진입점
-└── src/training/pre_training/
-    ├── config.py                      # Python dataclass 설정
-    ├── data/
-    │   ├── source/                    # local/Hugging Face 데이터 읽기
-    │   ├── format/                    # plain text/MCQA 정규화
-    │   ├── storage/                   # 처리 데이터 저장
-    │   └── process.py                 # source → format → storage
-    ├── tokenization/                  # tokenizer 인터페이스와 regex tokenizer
-    ├── dataset/                       # causal-LM dataset과 dynamic padding
-    ├── model/                         # embedding, RoPE, attention, block, LM
-    ├── loss.py
-    ├── scheduler.py
-    ├── checkpoint.py
-    ├── trainer.py
-    ├── generation.py
-    ├── pipeline.py
-    └── utils.py
+│   ├── load_data.py        # Hugging Face / toy text loading
+│   ├── tokenizer.py        # original regex tokenizer + vocab save/load
+│   └── dataset.py          # packed next-token dataset and collator
+├── model/
+│   └── model.py            # RoPE, attention, blocks, decoder LM
+└── train/
+    └── trainer.py          # optimizer, CE loss, checkpoints, loop
 ```
 
-별도의 `toy.toml`, `create_toy_data.py`, `train_tokenizer.py`, `prepare_data.py` 같은 실행 스크립트는 없습니다. 설정은 `config.py`의 dataclass와 `scripts/pretraining.py`의 CLI 인자로 관리합니다.
-
-## 설치
+## Install
 
 ```bash
-python -m venv .venv
+pip install -r requirements.txt
 ```
 
-Windows PowerShell:
-
-```powershell
-.venv\Scripts\Activate.ps1
-pip install -e .
-```
-
-Hugging Face 데이터셋도 사용할 경우:
-
-```powershell
-pip install -e ".[huggingface]"
-```
-
-## 각 기능 파일 자체 테스트
-
-각 핵심 `.py` 파일 아래에는 작은 샘플을 실행하는 `if __name__ == "__main__":` 블록이 있습니다. 프로젝트 루트에서 모듈로 실행합니다.
+## Small network-free end-to-end test
 
 ```bash
-python -m training.pre_training.data.source.local_jsonl
-python -m training.pre_training.data.format.mcqa
-python -m training.pre_training.data.process
-python -m training.pre_training.tokenization.regex_tokenizer
-python -m training.pre_training.dataset.collator
-python -m training.pre_training.model.rope
-python -m training.pre_training.model.attention
-python -m training.pre_training.model.language_model
-python -m training.pre_training.trainer
-python -m training.pre_training.pipeline
-```
-
-## 전체 pretraining 동작 확인
-
-별도 toy 파일을 만들지 않고 임시 디렉터리에서 2-step 학습을 수행합니다.
-
-```bash
-python scripts/pretraining.py --smoke-test
-```
-
-## 로컬 JSONL 데이터로 학습
-
-`data/raw/train.jsonl` 예시:
-
-```json
-{"text": "first pretraining document"}
-{"text": "second pretraining document"}
-```
-
-실행:
-
-```bash
-python scripts/pretraining.py \
-  --train-path data/raw/train.jsonl \
-  --eval-path data/raw/eval.jsonl \
-  --formatter plain_text \
-  --d-model 512 \
-  --n-heads 8 \
-  --n-layers 8 \
-  --max-seq-len 1024 \
-  --batch-size 4 \
-  --gradient-accumulation-steps 8 \
+python main.py \
+  --dataset_name toy \
+  --dataset_config "" \
+  --max_samples 4 \
+  --output_dir outputs/toy \
+  --context_length 16 \
+  --batch_size 2 \
+  --block_num 2 \
+  --embed_dim 64 \
+  --num_heads 4 \
   --epochs 1 \
-  --amp
+  --max_steps 3 \
+  --log_every 1 \
+  --device cpu
 ```
 
-Windows PowerShell에서는 줄 연결 문자를 백틱으로 바꿉니다.
-
-## MCQA 데이터로 학습
-
-행에 `question`, `options`, `answer` 또는 `answer_letter`가 있으면:
+## Wikipedia sample pretraining
 
 ```bash
-python scripts/pretraining.py \
-  --train-path data/raw/train.jsonl \
-  --formatter mcqa
+python main.py \
+  --dataset_name wikimedia/wikipedia \
+  --dataset_config 20231101.en \
+  --dataset_split train \
+  --text_column text \
+  --streaming \
+  --max_samples 10000 \
+  --max_vocab_size 30000 \
+  --min_token_frequency 2 \
+  --context_length 256 \
+  --batch_size 8 \
+  --block_num 8 \
+  --embed_dim 512 \
+  --num_heads 8 \
+  --epochs 1 \
+  --learning_rate 2e-4 \
+  --output_dir outputs/wiki_pretrain
 ```
 
-## Hugging Face 데이터로 확장
+All runtime values come from `config.py`. There is no second dictionary or
+`TrainingArguments` object that can silently replace a command-line value.
+`vocab_size` is intentionally derived from the tokenizer dictionary instead of
+being separately configurable.
+
+## Test each file independently
+
+Run from the project root:
 
 ```bash
-python scripts/pretraining.py \
-  --source huggingface \
-  --dataset-name m-a-p/SuperGPQA \
-  --train-split train \
-  --formatter mcqa
+python config.py
+python -m data.load_data
+python -m data.tokenizer
+python -m data.dataset
+python -m model.model
+python -m train.trainer
 ```
 
-새 데이터 저장소는 `DataSource`, 새 변환 형식은 `RecordFormatter`, 새 처리 데이터 저장 방식은 `DataStorage`, 새 tokenizer는 `TokenizerBase`, 새 embedding 공간은 `TokenEmbeddingSpace`를 구현해 추가합니다.
+Each test uses a tiny local sample. Only the real Wikipedia command requires a
+network connection.
+
+## Important scaling limit
+
+This keeps the original simple design: selected documents are materialized in
+memory, the vocabulary is built in one pass, and token IDs are packed into one
+in-memory tensor. It is appropriate for debugging and sampled-corpus training,
+but not yet for full multi-billion-token pretraining. A later scale-up should
+replace only `data/dataset.py` with a sharded/streaming token dataset; the model,
+trainer, CLI, and main wiring can remain.
