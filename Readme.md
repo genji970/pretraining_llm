@@ -27,25 +27,6 @@ llm_pretraining_modular/
 pip install -r requirements.txt
 ```
 
-## Small network-free end-to-end test
-
-```bash
-python main.py \
-  --dataset_name toy \
-  --dataset_config "" \
-  --max_samples 4 \
-  --output_dir outputs/toy \
-  --context_length 16 \
-  --batch_size 2 \
-  --block_num 2 \
-  --embed_dim 64 \
-  --num_heads 4 \
-  --epochs 1 \
-  --max_steps 3 \
-  --log_every 1 \
-  --device cpu
-```
-
 ## Wikipedia sample pretraining
 
 ```bash
