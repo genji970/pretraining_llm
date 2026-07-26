@@ -59,7 +59,7 @@ class PretrainingTrainer:
         checkpoint = torch.load(
             checkpoint_path,
             map_location=self.device,
-            weights_only=False,
+            weights_only=True, #False can run code inside, if checkpoint is unreliable, it can be risky.
         )
         self.model.load_state_dict(checkpoint["model_state_dict"])
         self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
