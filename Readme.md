@@ -10,7 +10,7 @@ Repository for recording progress on implementing LLM pretraining from scratch.
 
 ### 2. Data
 
-- **Paper 2-1: FineWeb**
+- **Paper 2-1: FineWeb** / (below is from Fineweb post.)
     - **2-1-1. Related resources**
         - [FineWeb blog post](https://huggingface.co/spaces/HuggingFaceFW/blogpost-fineweb-v1)
     - **2-1-2. Large-scale data processing library**
@@ -24,13 +24,21 @@ Repository for recording progress on implementing LLM pretraining from scratch.
             - Train small models on representative subsets of candidate datasets.
             - Evaluate the models on multiple downstream benchmarks.
             - Using diverse benchmarks helps prevent overfitting the data-selection process to a single benchmark.
+            - lighteval.(https://github.com/huggingface/lighteval/) / (Below is from lighteval repo.)
+                  - General knowledge : MMLU , MMMU , BIG-Bench
+                  - Question Answering : TriviaQA , Natural Questions, SimpleQA , Humanity's last question
+                  - Math and Code Benchmark :
+                  - Chat Model Evaluation :
+                      - Instruction Following : IFEval , IFEval-fr
+                      - Reasoning : MUSR, DROP(discrete reasoning)
+
         - **How to crwal**
             - preprocess CommonCrawl data(already in data format)
             - commoncrawl has two format : 1) WARC(raw data) 2) WET(text only version)
                   - can extract text data from WARC using **trafilatura library**
                   - WET was poor compared to text extracted from WARC 
                   - for tradeoff(budget and quality), it is good to use WET
-
+                    
 
 
 
