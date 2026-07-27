@@ -39,7 +39,26 @@ Repository for recording progress on implementing LLM pretraining from scratch.
                   - WET was poor compared to text extracted from WARC 
                   - for tradeoff(budget and quality), it is good to use WET
                     
-
+        - **Piepline**
+            - text extraction
+            - base filtering
+                - removing lower quality data in pipeline.
+                      - filtering basis
+                          - blocklist(URL filtering)
+                          - fastText language classifier
+                          - MassiveText filters(quality and repetition)
+                - Deduplicating
+                      - speed up method
+                          - hashing
+                          - efficient data structures in indexing
+                      - if searching is only for complete word, it's better to use hash table, inverted index, trie, etc in general rather than suffix array.
+                      - RefinedWeb, using MinHash & LSH bounding with (for 8 hash values(MinHash values) in one bounding and 14 bounding. So,8*14=112)
+                      - For common crawling, it periodically crawl data.
+                          - e.g) 2024-04-10 , 2024-04-11..(snapshot/ each is called dump).
+                              - If we deduplicate inside each snapshot, deplication amoong snapshots remain.
+                                  - From recent dump, deduplicate 1) inside dump 2) among dumps
+                      -  
+                      
 
 
 
