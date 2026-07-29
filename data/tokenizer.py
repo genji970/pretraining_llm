@@ -139,7 +139,12 @@ class Tokenizer:
         path.parent.mkdir(parents=True, exist_ok=True)
         self.backend.save(str(path))
     
+    @classmethod
+    def load(cls, path: str | Path) -> "Tokenizer":
+        backend=BackendTokenizer.from_file(str(path))
+        return cls(backend=backend)
     
+
 
 
     
