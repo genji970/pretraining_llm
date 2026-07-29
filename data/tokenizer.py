@@ -82,5 +82,37 @@ class Tokenizer:
     
     @property
     def pad_token_id(self) -> int:
-        return self.token_to_id()
+        return self.token_to_id("<pad>")
+    
+    @property
+    def bos_token_id(self) -> int:
+        return self.token_to_id("<bos")
+    
+    @property
+    def eos_token_id(self) -> int:
+        return self.token_to_id("<eos")
+    
+    @property
+    def unk_token_id(self) -> int:
+        return self.token_to_id("<unk")
+    
+    def encode(
+        self,
+        text: str,
+        add_bos: bool = False,
+        add_eos: bool = False,
+    ) -> list[int]:
+        encoding=self.backend.encode(
+            str(text),
+            add_special_tokens=False,
+        )
+
+        token_ids=list(encoding.ids)
+
+        if add_bos:
+            token_ids.insert(0, self.bos_token_id)
+        
+        
+    
+
 
