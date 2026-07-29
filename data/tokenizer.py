@@ -3,11 +3,6 @@ from __future__ import annotations
 from collections.abc import Iterable, Sequence
 from pathlib import Path
 
-from __future__ import annotations
-
-from collections.abc import Iterable, Sequence
-from pathlib import Path
-
 from tokenizers import Tokenizer as BackendTokenizer
 from tokenizers import decoders, models, pre_tokenizers, trainers
 
