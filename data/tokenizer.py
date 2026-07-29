@@ -77,5 +77,10 @@ class Tokenizer:
         token_id = self.backend.token_to_id(token)
         if token_id is None:
             raise KeyError(f"Token not found: {token!r}")
+
+        return int(token_id)
     
-    
+    @property
+    def pad_token_id(self) -> int:
+        return self.token_to_id()
+
