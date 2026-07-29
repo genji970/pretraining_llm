@@ -31,6 +31,9 @@ Repository for recording progress on implementing LLM pretraining from scratch.
                   - Chat Model Evaluation :
                       - Instruction Following : IFEval , IFEval-fr
                       - Reasoning : MUSR, DROP(discrete reasoning)
+        - **Pipeline**
+        - commoncrawl     
+            - extract text -> language filter -> url, document filter -> deduplication -> quality heuristic -> quality evaluation -> tokenization
 
         - **How to crwal**
             - preprocess CommonCrawl data(already in data format)
@@ -57,12 +60,53 @@ Repository for recording progress on implementing LLM pretraining from scratch.
                           - e.g) 2024-04-10 , 2024-04-11..(snapshot/ each is called dump).
                               - If we deduplicate inside each snapshot, deplication amoong snapshots remain.
                                   - From recent dump, deduplicate 1) inside dump 2) among dumps
-                      -  
+                      - deduplication does not show better performance.
+                          - duplication does not always mean their quality is bad. It might be essential data
+                              - Because it is improtant, it might show a lot.
+                              - data in deduplication shows better performance than kept dataset.
+                          - deduplication
+                              - did MinHash deduplication independently within each web dump rather than deduplicating across all dumps together shows better                                         performance.
+                              - Did deduplication independently preserved recurring high-quality data while removing massive duplicate clusters, allowing the                                         resulting dataset to match RefinedWeb’s performance.
+                              - If filterting process did well, deduplication with common sense seems to do better.
+                                  - filterning vs deduplication
+                                      - filtering : eliminating low quality data
+                                      - deduplication : eliminating same data
+                              
                       
+            -  Heuristic filtering
+                  - eliminating low quality data in accordance with Human criteria
+                        - if sentence length is too short, delete
+                        - if special character/numbers are too much, delete
+                        - if too much same sentence appear, delete
+                        - if . does not show a lot in the end of sentence, delete
+                        - if advertisement sentence shows a lot, delete
+            - Heuristic evaluation
+                  - fast, simple such as if sentence length is too short, bad score. So the problem is that it shows low quality.
 
+            - Experiement
+                  - Let global MinHash data is relatively low quality data compared to target data.
+                  - If some traits in global MinHash shows a lot but not in target data, delete those datas in target data.
+                      - Criteria is one more. do some small ablation test and if deleting these shows better performance, do delete.
 
+- **Big Data process piepline -> DataTrove**
+    - Big text data process library from huggingface
+    - It can do filtering, deduplication, process for big data.
+    - It is also used for fine web data process.
 
+ 
+- **Big Data process pipeline (2) -> NVIDIA NeMo Curator**
+    - Detect language and handle multi langauge
+    - exact,fuzzy,semantic deduplication
+    - Heuristic quality filtering
+    - quality evaluation based on classifier
+    - code data process
+    - generating synthetic data
 
+- **Dolma Toolkit**
+    - good toolkit for data procee pipeline tool
+
+- **Label data preprocess**
+    - 
               
 
 # Modular decoder-only pretraining
