@@ -2,15 +2,16 @@ Repository for recording progress on implementing LLM pretraining from scratch.
 
 ## In Progress
 
-```text
-### 1. Scaling
 
+### 1. Scaling
+```text
 - **Paper 1-1: Training Compute-Optimal Large Language Models**
     - The number of training tokens and model size should be scaled together.
     - Note: The paper used Huber loss for fitting the scaling-law model.
+```
 
 ### 2. Data
-
+```text
 - **Paper 2-1: FineWeb** / (below is from Fineweb post.)
     - **2-1-1. Related resources**
         - [FineWeb blog post](https://huggingface.co/spaces/HuggingFaceFW/blogpost-fineweb-v1)
@@ -89,15 +90,16 @@ Repository for recording progress on implementing LLM pretraining from scratch.
                   - If some traits in global MinHash shows a lot but not in target data, delete those datas in target data.
                       - Criteria is one more. do some small ablation test and if deleting these shows better performance, do delete.
 ```
-```text
+
 - **Big Data process piepline -> DataTrove**
+```text
     - Big text data process library from huggingface
     - It can do filtering, deduplication, process for big data.
     - It is also used for fine web data process.
 ```
 
-```text
 - **Big Data process pipeline (2) -> NVIDIA NeMo Curator**
+```text
     - Detect language and handle multi langauge
     - exact,fuzzy,semantic deduplication
     - Heuristic quality filtering
@@ -105,12 +107,14 @@ Repository for recording progress on implementing LLM pretraining from scratch.
     - code data process
     - generating synthetic data
 ```
-```text
+
 - **Dolma Toolkit**
+```text
     - good toolkit for data procee pipeline tool
 ```
-```text
+
 - **Label data preprocess**
+```text
 
 ```
 
