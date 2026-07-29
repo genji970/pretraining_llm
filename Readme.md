@@ -66,8 +66,8 @@ Repository for recording progress on implementing LLM pretraining from scratch.
                               - Because it is improtant, it might show a lot.
                               - data in deduplication shows better performance than kept dataset.
                           - deduplication
-                              - did MinHash deduplication independently within each web dump rather than deduplicating across all dumps together shows better                                         performance.
-                              - Did deduplication independently preserved recurring high-quality data while removing massive duplicate clusters, allowing the                                         resulting dataset to match RefinedWeb’s performance.
+                              - did MinHash deduplication independently within each web dump rather than deduplicating across all dumps together shows better performance.
+                              - Did deduplication independently preserved recurring high-quality data while removing massive duplicate clusters, allowing the resulting dataset to match RefinedWeb’s performance.
                               - If filterting process did well, deduplication with common sense seems to do better.
                                   - filterning vs deduplication
                                       - filtering : eliminating low quality data
