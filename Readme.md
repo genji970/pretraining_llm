@@ -118,6 +118,25 @@ Repository for recording progress on implementing LLM pretraining from scratch.
 
 ```
 
+- **generating synthetic data**
+```text
+
+- **Distilabel**
+  - famous framework to generate data for SFT, preference
+        - generating multi answers
+        - judge evaluate answer
+        - score, reason save
+        - chosen/rejected building
+        - filtering and saving
+
+- **NeMo Curator Synthetic Data**
+        - generaint multilingual Q&A
+        - paraphrasing
+        - get knowldge
+        - SFT data generating
+        - preference data generating
+```
+
 # Modular decoder-only pretraining
 
 The original notebook modules were separated by function and connected with a
