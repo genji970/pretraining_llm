@@ -2,6 +2,7 @@ Repository for recording progress on implementing LLM pretraining from scratch.
 
 ## In Progress
 
+```text
 ### 1. Scaling
 
 - **Paper 1-1: Training Compute-Optimal Large Language Models**
@@ -87,7 +88,7 @@ Repository for recording progress on implementing LLM pretraining from scratch.
                   - Let global MinHash data is relatively low quality data compared to target data.
                   - If some traits in global MinHash shows a lot but not in target data, delete those datas in target data.
                       - Criteria is one more. do some small ablation test and if deleting these shows better performance, do delete.
-
+```
 - **Big Data process piepline -> DataTrove**
     - Big text data process library from huggingface
     - It can do filtering, deduplication, process for big data.
@@ -106,8 +107,6 @@ Repository for recording progress on implementing LLM pretraining from scratch.
     - good toolkit for data procee pipeline tool
 
 - **Label data preprocess**
-    - 
-              
 
 # Modular decoder-only pretraining
 
