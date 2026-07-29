@@ -59,7 +59,7 @@ class Tokenizer:
             show_progress=True,
         )
 
-        tokenizer.backend.trainer(
+        tokenizer.backend.train_from_iterator(
             texts,
             trainer=trainer,
             length=length,
@@ -70,7 +70,7 @@ class Tokenizer:
         return self.backend.get_vocab_size()
 
     @property
-    def dictionary(self) -> dic[str, int]:
+    def dictionary(self) -> dict[str, int]:
         return self.backend.get_vocab()
     
     def token_to_id(self, token: str) -> int:
@@ -86,15 +86,15 @@ class Tokenizer:
     
     @property
     def bos_token_id(self) -> int:
-        return self.token_to_id("<bos")
+        return self.token_to_id("<bos>")
     
     @property
     def eos_token_id(self) -> int:
-        return self.token_to_id("<eos")
+        return self.token_to_id("<eos>")
     
     @property
     def unk_token_id(self) -> int:
-        return self.token_to_id("<unk")
+        return self.token_to_id("<unk>")
     
     def encode(
         self,
