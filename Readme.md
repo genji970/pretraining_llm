@@ -89,12 +89,14 @@ Repository for recording progress on implementing LLM pretraining from scratch.
                   - If some traits in global MinHash shows a lot but not in target data, delete those datas in target data.
                       - Criteria is one more. do some small ablation test and if deleting these shows better performance, do delete.
 ```
+```text
 - **Big Data process piepline -> DataTrove**
     - Big text data process library from huggingface
     - It can do filtering, deduplication, process for big data.
     - It is also used for fine web data process.
+```
 
- 
+```text
 - **Big Data process pipeline (2) -> NVIDIA NeMo Curator**
     - Detect language and handle multi langauge
     - exact,fuzzy,semantic deduplication
@@ -102,11 +104,15 @@ Repository for recording progress on implementing LLM pretraining from scratch.
     - quality evaluation based on classifier
     - code data process
     - generating synthetic data
-
+```
+```text
 - **Dolma Toolkit**
     - good toolkit for data procee pipeline tool
-
+```
+```text
 - **Label data preprocess**
+
+```
 
 # Modular decoder-only pretraining
 
