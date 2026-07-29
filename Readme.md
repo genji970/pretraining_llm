@@ -149,6 +149,7 @@ Repository for recording progress on implementing LLM pretraining from scratch.
     - optimizer state / parameter sharding
     -  torch.cuda.empty_cache() does not affect to live tensor.
     -  use bf16
+    - 
       ```python
       if torch.cuda.is_available() and torch.cuda.is_bf16_supported() -> bf16 is possible to use.
       torch.bfloat16 if is_bf16 else else torch.float16
