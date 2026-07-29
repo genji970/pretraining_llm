@@ -111,8 +111,37 @@ class Tokenizer:
 
         if add_bos:
             token_ids.insert(0, self.bos_token_id)
+        if add_eos:
+            token_ids.append(self.eos_token_id)
         
+        return token_ids
+    
+    def tokenize(self, text: str) -> list[str]:
+        return list(
+            self.backend.encode(
+                str(text),
+                add_special_tokens=False,
+            ).tokens
+        )
         
+    def decode(
+        self,
+        token_ids: Sequence[int],
+        skip_special_tokens: bool = True,
+    ) -> str:
+        return self.backend.decode(
+            [int(token_id) for token_id in token_ids],
+            skip_special_tokens=skip_special_tokens,
+        )
+    
+    def save(self, path: str | Path) -> None:
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        self.backend.save(str(path))
+    
+    
+
+
     
 
 
