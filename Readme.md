@@ -137,6 +137,25 @@ Repository for recording progress on implementing LLM pretraining from scratch.
         - preference data generating
 ```
 
+### 2. GPU
+
+- **gpu use**
+    - allocate = torch.cuda.memory_allocated() / 1024**3 -> gb
+    - reserved = torch.cuda.memory_reserved() / 1024 **3
+    - peak = torch.cuda.max_memory_allocated() / 1024 ** 3
+
+- **When memory usage faces limitation**
+    - gradient checkpointing
+    - optimizer state / parameter sharding
+    -  torch.cuda.empty_cache() does not affect to live tensor.
+    -  use bf16
+          - if torch.cuda.is_available() and torch.cuda.is_bf16_supported() -> bf16 is possible to use.
+                - torch.bfloat16 if is_bf16 else else torch.float16
+
+
+
+
+
 # Modular decoder-only pretraining
 
 The original notebook modules were separated by function and connected with a
