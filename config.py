@@ -119,29 +119,58 @@ def build_parser() -> argparse.ArgumentParser:
     model.add_argument("--num_heads", type=int, default=8)
     model.add_argument("--dropout", type=float, default=0.1)
 
-    train = parser.add_argument_group("training")
-    train.add_argument("--output_dir", type=str, default="outputs/wiki_pretrain")
+        train = parser.add_argument_group("training")
+
+    train.add_argument(
+        "--output_dir",
+        type=str,
+        default="outputs/fineweb_pretrain",
+    )
     train.add_argument("--batch_size", type=int, default=8)
     train.add_argument("--num_workers", type=int, default=0)
     train.add_argument("--epochs", type=int, default=1)
     train.add_argument("--learning_rate", type=float, default=2e-4)
     train.add_argument("--weight_decay", type=float, default=0.01)
     train.add_argument("--max_grad_norm", type=float, default=1.0)
-    train.add_argument("--log_every", type=int, default=10)
+
     train.add_argument(
-        "--save_every",
+        "--log_every_steps",
         type=int,
-        default=0,
-        help="Save every N optimizer steps. 0 disables periodic checkpoints.",
+        default=10,
+        help="Print training status every N optimizer steps.",
     )
+
     train.add_argument(
         "--max_steps",
         type=int,
         default=0,
-        help="Stop after N optimizer steps. 0 means no step limit.",
+        help=(
+            "Absolute maximum number of optimizer steps across all chunks. "
+            "0 means no step limit."
+        ),
     )
-    train.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
-    train.add_argument("--resume_from", type=str, default=None)
+
+    train.add_argument(
+        "--early_stop_step",
+        type=int,
+        default=0,
+        help=(
+            "Manually terminate training at this global step. "
+            "Useful for short test runs. 0 disables it."
+        ),
+    )
+
+    train.add_argument(
+        "--device",
+        choices=["auto", "cpu", "cuda"],
+        default="auto",
+    )
+
+    train.add_argument(
+        "--resume_from",
+        type=str,
+        default=None,
+    )
 
     return parser
 
