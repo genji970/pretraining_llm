@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
+from itertools import cycle, islice
 
 
 TOY_TEXTS = [
@@ -11,46 +12,17 @@ TOY_TEXTS = [
 ]
 
 
-def _clean_texts(rows: Iterable[dict], text_column: str, max_samples: int) -> list[str]:
-    texts: list[str] = []
-    for row in rows:
-        if text_column not in row:
-            available = ", ".join(sorted(row.keys()))
-            raise KeyError(
-                f"text column {text_column!r} was not found. Available columns: {available}"
-            )
-        text = str(row[text_column]).strip()
-        if text:
-            texts.append(text)
-        if len(texts) >= max_samples:
-            break
-    if not texts:
-        raise ValueError("No non-empty text samples were loaded.")
-    return texts
-
-
-def load_pretraining_texts(
+def load_pretraining_stream(
     dataset_name: str,
     dataset_config: str | None,
     split: str,
-    text_column: str,
-    max_samples: int,
     streaming: bool,
     seed: int,
     shuffle_buffer: int,
-) -> list[str]:
-    """Load a bounded list of documents for the current in-memory pipeline.
-
-    `toy` is intentionally network-free and is used by module smoke tests.
-    For Hugging Face datasets, imports happen lazily so the toy tests work even
-    before `datasets` is installed.
-    """
-    if max_samples <= 0:
-        raise ValueError("max_samples must be positive")
-
+) -> Iterable[dict]:
+    """Open the dataset once and return an iterable over source rows."""
     if dataset_name == "toy":
-        repeats = (max_samples + len(TOY_TEXTS) - 1) // len(TOY_TEXTS)
-        return (TOY_TEXTS * repeats)[:max_samples]
+        return cycle({"text": text} for text in TOY_TEXTS)
 
     try:
         from datasets import load_dataset
@@ -60,9 +32,8 @@ def load_pretraining_texts(
             "Install it with: pip install -r requirements.txt"
         ) from exc
 
-    requested_split = split if streaming else f"{split}[:{max_samples}]"
     load_kwargs: dict[str, object] = {
-        "split": requested_split,
+        "split": split,
         "streaming": streaming,
     }
     if dataset_config is None:
@@ -70,27 +41,75 @@ def load_pretraining_texts(
     else:
         dataset = load_dataset(dataset_name, dataset_config, **load_kwargs)
 
-    if streaming:
-        if shuffle_buffer > 0:
+    if shuffle_buffer > 0:
+        if streaming:
             dataset = dataset.shuffle(seed=seed, buffer_size=shuffle_buffer)
-        return _clean_texts(dataset, text_column, max_samples)
+        else:
+            dataset = dataset.shuffle(seed=seed)
 
-    dataset = dataset.shuffle(seed=seed)
-    row_count = min(max_samples, len(dataset))
-    dataset = dataset.select(range(row_count))
-    return _clean_texts(dataset, text_column, max_samples)
+    return dataset
+
+
+def skip_source_rows(rows: Iterable[dict], row_count: int) -> Iterable[dict]:
+    """Resume at a source-row offset without materializing earlier rows."""
+    if row_count <= 0:
+        return rows
+
+    skip_method = getattr(rows, "skip", None)
+    if callable(skip_method):
+        return skip_method(row_count)
+
+    return islice(rows, row_count, None)
+
+
+def load_next_text_chunk(
+    row_iterator: Iterator[dict],
+    text_column: str,
+    chunk_size: int,
+) -> tuple[list[str], int]:
+    """Collect at most chunk_size non-empty documents from one shared iterator.
+
+    Returns the accepted texts and the number of source rows consumed. The source
+    row count can be larger than the text count when empty documents are skipped.
+    """
+    if chunk_size <= 0:
+        raise ValueError("chunk_size must be positive")
+
+    texts: list[str] = []
+    source_rows_consumed = 0
+
+    while len(texts) < chunk_size:
+        try:
+            row = next(row_iterator)
+        except StopIteration:
+            break
+
+        source_rows_consumed += 1
+
+        if text_column not in row:
+            available = ", ".join(sorted(row.keys()))
+            raise KeyError(
+                f"text column {text_column!r} was not found. "
+                f"Available columns: {available}"
+            )
+
+        text = str(row[text_column]).strip()
+        if text:
+            texts.append(text)
+
+    return texts, source_rows_consumed
 
 
 if __name__ == "__main__":
-    samples = load_pretraining_texts(
+    stream = load_pretraining_stream(
         dataset_name="toy",
         dataset_config=None,
         split="train",
-        text_column="text",
-        max_samples=3,
         streaming=True,
         seed=42,
         shuffle_buffer=0,
     )
-    print(f"loaded={len(samples)}")
-    print(samples[0])
+    iterator = iter(stream)
+    first_chunk, consumed = load_next_text_chunk(iterator, "text", chunk_size=3)
+    print(f"loaded={len(first_chunk)} consumed_rows={consumed}")
+    print(first_chunk[0])
