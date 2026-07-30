@@ -19,9 +19,6 @@ class TrainConfig:
     seed: int
 
     output_dir: str
-    vocab_path: str | None
-    max_vocab_size: int
-    min_token_frequency: int
 
     context_length: int
     batch_size: int
