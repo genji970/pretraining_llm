@@ -172,6 +172,66 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
     )
 
+    
+    early_stop = parser.add_argument_group(
+        "automatic early stopping"
+    )
+
+    early_stop.add_argument(
+        "--early_stop_metric",
+        type=str,
+        default="train_loss",
+        help=(
+            "Metric monitored for automatic early stopping. "
+            "Examples: train_loss, perplexity, grad_norm."
+        ),
+    )
+
+    early_stop.add_argument(
+        "--early_stop_mode",
+        choices=["min", "max"],
+        default="min",
+        help=(
+            "min means lower is better; max means higher is better."
+        ),
+    )
+
+    early_stop.add_argument(
+        "--early_stop_threshold",
+        type=float,
+        default=None,
+        help=(
+            "Stop when the monitored metric reaches this value. "
+            "None disables threshold-based stopping."
+        ),
+    )
+
+    early_stop.add_argument(
+        "--early_stop_patience_steps",
+        type=int,
+        default=0,
+        help=(
+            "Stop if the monitored metric has not improved for this "
+            "many optimizer steps. 0 disables patience stopping."
+        ),
+    )
+
+    early_stop.add_argument(
+        "--early_stop_min_delta",
+        type=float,
+        default=0.0,
+        help="Minimum metric change counted as an improvement.",
+    )
+
+    early_stop.add_argument(
+        "--early_stop_warmup_steps",
+        type=int,
+        default=0,
+        help=(
+            "Do not apply metric-based early stopping before this step."
+        ),
+    )
+
     return parser
 
 
