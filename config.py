@@ -119,7 +119,7 @@ def build_parser() -> argparse.ArgumentParser:
     model.add_argument("--num_heads", type=int, default=8)
     model.add_argument("--dropout", type=float, default=0.1)
 
-        train = parser.add_argument_group("training")
+    train = parser.add_argument_group("training")
 
     train.add_argument(
         "--output_dir",
