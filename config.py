@@ -13,7 +13,8 @@ class TrainConfig:
     dataset_config: str | None
     dataset_split: str
     text_column: str
-    max_samples: int
+    total_documents: int
+    chunk_size: int
     streaming: bool
     shuffle_buffer: int
     seed: int
