@@ -1,2 +1,5 @@
 torch>=2.2
 datasets>=3.0
+transformers>=4.45
+tensorboard>=2.17
+matplotlib>=3.8
