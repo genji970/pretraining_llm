@@ -30,13 +30,53 @@ class TrainConfig:
     num_heads: int
     dropout: float
 
+    # Training
     epochs: int
     learning_rate: float
     weight_decay: float
     max_grad_norm: float
-    log_every: int
+    log_every_steps: int
+    max_steps: int
+    early_stop_step: int
     device: str
     resume_from: str | None
+
+    # Automatic early stopping
+    early_stop_metric: str
+    early_stop_mode: str
+    early_stop_threshold: float | None
+    early_stop_patience_steps: int
+    early_stop_min_delta: float
+    early_stop_warmup_steps: int
+
+    # Checkpointing
+    save_every_steps: int
+    save_each_chunk: bool
+    save_optimizer_state: bool
+
+    save_best_checkpoint: bool
+    best_checkpoint_metric: str
+    best_checkpoint_mode: str
+    best_checkpoint_min_delta: float
+
+    save_threshold_checkpoint: bool
+    threshold_checkpoint_metric: str
+    threshold_checkpoint_value: float | None
+    threshold_checkpoint_mode: str
+    threshold_checkpoint_once: bool
+
+    # Metrics and visualization
+    metrics_every_steps: int
+    metric_smoothing_window: int
+    jsonl_metrics: bool
+    tensorboard: bool
+    save_plots: bool
+    plot_every_steps: int
+    plot_metrics: str
+    max_plot_points: int
+
+    log_parameter_norm: bool
+    histogram_every_steps: int
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
