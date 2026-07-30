@@ -172,7 +172,7 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
     )
 
-    
+    # metric config
     early_stop = parser.add_argument_group(
         "automatic early stopping"
     )
