@@ -4,33 +4,34 @@ import argparse
 from dataclasses import asdict, dataclass
 from typing import Sequence
 
+
 @dataclass(frozen=True)
 class TrainConfig:
+    # Data
     dataset_name: str
     dataset_config: str | None
     dataset_split: str
     text_column: str
-
     total_documents: int
     chunk_size: int
-
     streaming: bool
     shuffle_buffer: int
     seed: int
 
+    # Tokenizer
     tokenizer_name: str
-    output_dir: str
 
+    # Model and dataloader
     context_length: int
     batch_size: int
     num_workers: int
-
     block_num: int
     embed_dim: int
     num_heads: int
     dropout: float
 
     # Training
+    output_dir: str
     epochs: int
     learning_rate: float
     weight_decay: float
@@ -50,190 +51,18 @@ class TrainConfig:
     early_stop_warmup_steps: int
 
     # Checkpointing
-    checkpoint = parser.add_argument_group("checkpointing")
-
-    checkpoint.add_argument(
-        "--save_every_steps",
-        "--save_every",
-        dest="save_every_steps",
-        type=int,
-        default=1000,
-        help=(
-            "Save a periodic checkpoint every N optimizer steps. "
-            "0 disables periodic checkpoints."
-        ),
-    )
-
-    checkpoint.add_argument(
-        "--save_each_chunk",
-        action=argparse.BooleanOptionalAction,
-        default=True,
-        help="Save a checkpoint whenever one data chunk finishes.",
-    )
-
-    checkpoint.add_argument(
-        "--save_optimizer_state",
-        action=argparse.BooleanOptionalAction,
-        default=False,
-        help="Include optimizer state in checkpoints.",
-    )
-
-    checkpoint.add_argument(
-        "--save_best_checkpoint",
-        action=argparse.BooleanOptionalAction,
-        default=True,
-        help="Save whenever the monitored metric reaches a new best.",
-    )
-
-    checkpoint.add_argument(
-        "--best_checkpoint_metric",
-        type=str,
-        default="train_loss",
-    )
-
-    checkpoint.add_argument(
-        "--best_checkpoint_mode",
-        choices=["min", "max"],
-        default="min",
-    )
-
-    checkpoint.add_argument(
-        "--best_checkpoint_min_delta",
-        type=float,
-        default=0.0,
-        help=(
-            "Required improvement before replacing the best checkpoint."
-        ),
-    )
-
-    checkpoint.add_argument(
-        "--save_threshold_checkpoint",
-        action=argparse.BooleanOptionalAction,
-        default=False,
-        help="Save when a metric reaches a configured threshold.",
-    )
-
-    checkpoint.add_argument(
-        "--threshold_checkpoint_metric",
-        type=str,
-        default="train_loss",
-    )
-
-    checkpoint.add_argument(
-        "--threshold_checkpoint_value",
-        type=float,
-        default=None,
-    )
-
-    checkpoint.add_argument(
-        "--threshold_checkpoint_mode",
-        choices=["min", "max"],
-        default="min",
-        help=(
-            "min saves when metric <= threshold; "
-            "max saves when metric >= threshold."
-        ),
-    )
-
-    checkpoint.add_argument(
-        "--threshold_checkpoint_once",
-        action=argparse.BooleanOptionalAction,
-        default=True,
-        help=(
-            "Save only the first checkpoint that reaches the threshold."
-        ),
-    )
-
-    monitor = parser.add_argument_group(
-        "metrics and visualization"
-    )
-
-    monitor.add_argument(
-        "--metrics_every_steps",
-        type=int,
-        default=10,
-        help=(
-            "Calculate and write training metrics every N steps."
-        ),
-    )
-
-    monitor.add_argument(
-        "--metric_smoothing_window",
-        type=int,
-        default=20,
-        help=(
-            "Number of recent metric records used for smoothing."
-        ),
-    )
-
-    monitor.add_argument(
-        "--jsonl_metrics",
-        action=argparse.BooleanOptionalAction,
-        default=True,
-        help="Append metrics to metrics/train_metrics.jsonl.",
-    )
-
-    monitor.add_argument(
-        "--tensorboard",
-        action=argparse.BooleanOptionalAction,
-        default=True,
-        help="Write TensorBoard event files.",
-    )
-
-    monitor.add_argument(
-        "--save_plots",
-        action=argparse.BooleanOptionalAction,
-        default=True,
-        help="Save metric plots as PNG files.",
-    )
-
-    monitor.add_argument(
-        "--plot_every_steps",
-        type=int,
-        default=500,
-        help=(
-            "Regenerate PNG plots every N steps. "
-            "0 means generate plots only when training ends."
-        ),
-    )
-
-    monitor.add_argument(
-        "--plot_metrics",
-        type=str,
-        default=(
-            "train_loss,perplexity,grad_norm,learning_rate,"
-            "tokens_per_second,samples_per_second,"
-            "gpu_allocated_gb,gpu_reserved_gb,"
-            "gpu_peak_allocated_gb"
-        ),
-        help="Comma-separated metrics saved as separate PNG files.",
-    )
-
-    monitor.add_argument(
-        "--max_plot_points",
-        type=int,
-        default=5000,
-        help=(
-            "Maximum number of points drawn in each PNG graph."
-        ),
-    )
-
-    monitor.add_argument(
-        "--log_parameter_norm",
-        action=argparse.BooleanOptionalAction,
-        default=False,
-        help="Record the total model parameter norm.",
-    )
-
-    monitor.add_argument(
-        "--histogram_every_steps",
-        type=int,
-        default=0,
-        help=(
-            "Write parameter and gradient histograms to TensorBoard "
-            "every N steps. 0 disables histograms."
-        ),
-    )
+    save_every_steps: int
+    save_each_chunk: bool
+    save_optimizer_state: bool
+    save_best_checkpoint: bool
+    best_checkpoint_metric: str
+    best_checkpoint_mode: str
+    best_checkpoint_min_delta: float
+    save_threshold_checkpoint: bool
+    threshold_checkpoint_metric: str
+    threshold_checkpoint_value: float | None
+    threshold_checkpoint_mode: str
+    threshold_checkpoint_once: bool
 
     # Metrics and visualization
     metrics_every_steps: int
@@ -244,7 +73,6 @@ class TrainConfig:
     plot_every_steps: int
     plot_metrics: str
     max_plot_points: int
-
     log_parameter_norm: bool
     histogram_every_steps: int
 
@@ -254,7 +82,7 @@ class TrainConfig:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Train the from-scratch decoder-only language model."
+        description="Train the from-scratch decoder-only language model in data chunks."
     )
 
     data = parser.add_argument_group("data")
@@ -263,24 +91,33 @@ def build_parser() -> argparse.ArgumentParser:
     data.add_argument("--dataset_split", type=str, default="train")
     data.add_argument("--text_column", type=str, default="text")
     data.add_argument(
-        "--max_samples",
+        "--total_documents",
+        type=int,
+        default=100_000,
+        help="Total number of non-empty documents used across all chunks.",
+    )
+    data.add_argument(
+        "--chunk_size",
         type=int,
         default=10_000,
-        help="Number of documents to materialize from the dataset.",
+        help="Maximum number of non-empty documents held in memory at one time.",
     )
     data.add_argument(
         "--streaming",
         action=argparse.BooleanOptionalAction,
         default=True,
-        help="Use Hugging Face streaming. Disable with --no-streaming.",
+        help="Use Hugging Face streaming. Recommended for very large datasets.",
     )
     data.add_argument("--shuffle_buffer", type=int, default=10_000)
     data.add_argument("--seed", type=int, default=42)
 
     tokenizer = parser.add_argument_group("tokenizer")
-    tokenizer.add_argument("--vocab_path", type=str, default=None)
-    tokenizer.add_argument("--max_vocab_size", type=int, default=30_000)
-    tokenizer.add_argument("--min_token_frequency", type=int, default=2)
+    tokenizer.add_argument(
+        "--tokenizer_name",
+        type=str,
+        default="openai-community/gpt2",
+        help="Pretrained tokenizer name or local tokenizer directory.",
+    )
 
     model = parser.add_argument_group("model")
     model.add_argument("--context_length", type=int, default=256)
@@ -290,116 +127,177 @@ def build_parser() -> argparse.ArgumentParser:
     model.add_argument("--dropout", type=float, default=0.1)
 
     train = parser.add_argument_group("training")
-
-    train.add_argument(
-        "--output_dir",
-        type=str,
-        default="outputs/fineweb_pretrain",
-    )
+    train.add_argument("--output_dir", type=str, default="outputs/chunked_pretrain")
     train.add_argument("--batch_size", type=int, default=8)
     train.add_argument("--num_workers", type=int, default=0)
-    train.add_argument("--epochs", type=int, default=1)
+    train.add_argument(
+        "--epochs",
+        type=int,
+        default=1,
+        help="Number of passes over each in-memory data chunk.",
+    )
     train.add_argument("--learning_rate", type=float, default=2e-4)
     train.add_argument("--weight_decay", type=float, default=0.01)
     train.add_argument("--max_grad_norm", type=float, default=1.0)
-
     train.add_argument(
         "--log_every_steps",
         type=int,
         default=10,
-        help="Print training status every N optimizer steps.",
+        help="Print the current training status every N optimizer steps.",
     )
-
     train.add_argument(
         "--max_steps",
         type=int,
         default=0,
-        help=(
-            "Absolute maximum number of optimizer steps across all chunks. "
-            "0 means no step limit."
-        ),
+        help="Absolute global optimizer-step limit. 0 disables this limit.",
     )
-
     train.add_argument(
         "--early_stop_step",
         type=int,
         default=0,
-        help=(
-            "Manually terminate training at this global step. "
-            "Useful for short test runs. 0 disables it."
-        ),
+        help="Manual global step at which training stops. 0 disables it.",
     )
+    train.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
+    train.add_argument("--resume_from", type=str, default=None)
 
-    train.add_argument(
-        "--device",
-        choices=["auto", "cpu", "cuda"],
-        default="auto",
-    )
-
-    train.add_argument(
-        "--resume_from",
-        type=str,
-        default=None,
-    )
-
-    # metric config
-    early_stop = parser.add_argument_group(
-        "automatic early stopping"
-    )
-
+    early_stop = parser.add_argument_group("automatic early stopping")
     early_stop.add_argument(
         "--early_stop_metric",
         type=str,
         default="train_loss",
-        help=(
-            "Metric monitored for automatic early stopping. "
-            "Examples: train_loss, perplexity, grad_norm."
-        ),
+        help="Metric monitored by threshold and patience early stopping.",
     )
-
     early_stop.add_argument(
         "--early_stop_mode",
         choices=["min", "max"],
         default="min",
-        help=(
-            "min means lower is better; max means higher is better."
-        ),
+        help="Use min when lower is better and max when higher is better.",
     )
-
     early_stop.add_argument(
         "--early_stop_threshold",
         type=float,
         default=None,
-        help=(
-            "Stop when the monitored metric reaches this value. "
-            "None disables threshold-based stopping."
-        ),
+        help="Stop after the monitored metric reaches this threshold.",
     )
-
     early_stop.add_argument(
         "--early_stop_patience_steps",
         type=int,
         default=0,
-        help=(
-            "Stop if the monitored metric has not improved for this "
-            "many optimizer steps. 0 disables patience stopping."
-        ),
+        help="Stop after this many steps without improvement. 0 disables it.",
     )
-
     early_stop.add_argument(
         "--early_stop_min_delta",
         type=float,
         default=0.0,
-        help="Minimum metric change counted as an improvement.",
+        help="Minimum change counted as an improvement.",
     )
-
     early_stop.add_argument(
         "--early_stop_warmup_steps",
         type=int,
         default=0,
-        help=(
-            "Do not apply metric-based early stopping before this step."
+        help="Do not apply metric-based early stopping before this step.",
+    )
+
+    checkpoint = parser.add_argument_group("checkpointing")
+    checkpoint.add_argument(
+        "--save_every_steps",
+        "--save_every",
+        dest="save_every_steps",
+        type=int,
+        default=1_000,
+        help="Save a periodic checkpoint every N steps. 0 disables it.",
+    )
+    checkpoint.add_argument(
+        "--save_each_chunk",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Save a checkpoint after a complete chunk finishes.",
+    )
+    checkpoint.add_argument(
+        "--save_optimizer_state",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Include optimizer state in every checkpoint.",
+    )
+    checkpoint.add_argument(
+        "--save_best_checkpoint",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    checkpoint.add_argument(
+        "--best_checkpoint_metric", type=str, default="train_loss"
+    )
+    checkpoint.add_argument(
+        "--best_checkpoint_mode", choices=["min", "max"], default="min"
+    )
+    checkpoint.add_argument(
+        "--best_checkpoint_min_delta", type=float, default=0.0
+    )
+    checkpoint.add_argument(
+        "--save_threshold_checkpoint",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    checkpoint.add_argument(
+        "--threshold_checkpoint_metric", type=str, default="train_loss"
+    )
+    checkpoint.add_argument(
+        "--threshold_checkpoint_value", type=float, default=None
+    )
+    checkpoint.add_argument(
+        "--threshold_checkpoint_mode", choices=["min", "max"], default="min"
+    )
+    checkpoint.add_argument(
+        "--threshold_checkpoint_once",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+
+    monitor = parser.add_argument_group("metrics and visualization")
+    monitor.add_argument("--metrics_every_steps", type=int, default=10)
+    monitor.add_argument("--metric_smoothing_window", type=int, default=20)
+    monitor.add_argument(
+        "--jsonl_metrics",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    monitor.add_argument(
+        "--tensorboard",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    monitor.add_argument(
+        "--save_plots",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    monitor.add_argument(
+        "--plot_every_steps",
+        type=int,
+        default=500,
+        help="Regenerate PNG plots every N steps. 0 means only at the end.",
+    )
+    monitor.add_argument(
+        "--plot_metrics",
+        type=str,
+        default=(
+            "train_loss,perplexity,grad_norm,learning_rate,"
+            "tokens_per_second,samples_per_second,"
+            "gpu_allocated_gb,gpu_reserved_gb,gpu_peak_allocated_gb"
         ),
+        help="Comma-separated metrics saved as separate PNG files.",
+    )
+    monitor.add_argument("--max_plot_points", type=int, default=5_000)
+    monitor.add_argument(
+        "--log_parameter_norm",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    monitor.add_argument(
+        "--histogram_every_steps",
+        type=int,
+        default=0,
+        help="TensorBoard parameter/gradient histogram interval. 0 disables it.",
     )
 
     return parser
@@ -424,7 +322,7 @@ def _validate(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None
         if getattr(args, name) <= 0:
             parser.error(f"--{name} must be positive")
 
-        nonnegative_names = (
+    nonnegative_names = (
         "shuffle_buffer",
         "num_workers",
         "max_steps",
@@ -453,6 +351,19 @@ def _validate(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None
         parser.error("--learning_rate must be positive")
     if args.max_grad_norm <= 0:
         parser.error("--max_grad_norm must be positive")
+    if not args.tokenizer_name.strip():
+        parser.error("--tokenizer_name must not be empty")
+    if not args.plot_metrics.strip():
+        parser.error("--plot_metrics must contain at least one metric name")
+    if args.save_threshold_checkpoint and args.threshold_checkpoint_value is None:
+        parser.error(
+            "--threshold_checkpoint_value is required when "
+            "--save_threshold_checkpoint is enabled"
+        )
+    if args.histogram_every_steps > 0 and not args.tensorboard:
+        parser.error("--histogram_every_steps requires --tensorboard")
+    if args.plot_every_steps > 0 and not args.save_plots:
+        parser.error("--plot_every_steps requires --save_plots")
 
 
 def parse_config(argv: Sequence[str] | None = None) -> TrainConfig:
@@ -460,11 +371,8 @@ def parse_config(argv: Sequence[str] | None = None) -> TrainConfig:
     namespace = parser.parse_args(argv)
     _validate(namespace, parser)
 
-    # Empty string is treated as no config, but no later module mutates values.
     if namespace.dataset_config == "":
         namespace.dataset_config = None
-    if namespace.vocab_path == "":
-        namespace.vocab_path = None
     if namespace.resume_from == "":
         namespace.resume_from = None
 
@@ -478,7 +386,9 @@ if __name__ == "__main__":
             "toy",
             "--dataset_config",
             "",
-            "--max_samples",
+            "--total_documents",
+            "8",
+            "--chunk_size",
             "4",
             "--block_num",
             "2",
@@ -486,6 +396,10 @@ if __name__ == "__main__":
             "32",
             "--num_heads",
             "4",
+            "--no-tensorboard",
+            "--no-save_plots",
+            "--plot_every_steps",
+            "0",
         ]
     )
     print(toy_config)
