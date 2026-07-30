@@ -50,20 +50,190 @@ class TrainConfig:
     early_stop_warmup_steps: int
 
     # Checkpointing
-    save_every_steps: int
-    save_each_chunk: bool
-    save_optimizer_state: bool
+    checkpoint = parser.add_argument_group("checkpointing")
 
-    save_best_checkpoint: bool
-    best_checkpoint_metric: str
-    best_checkpoint_mode: str
-    best_checkpoint_min_delta: float
+    checkpoint.add_argument(
+        "--save_every_steps",
+        "--save_every",
+        dest="save_every_steps",
+        type=int,
+        default=1000,
+        help=(
+            "Save a periodic checkpoint every N optimizer steps. "
+            "0 disables periodic checkpoints."
+        ),
+    )
 
-    save_threshold_checkpoint: bool
-    threshold_checkpoint_metric: str
-    threshold_checkpoint_value: float | None
-    threshold_checkpoint_mode: str
-    threshold_checkpoint_once: bool
+    checkpoint.add_argument(
+        "--save_each_chunk",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Save a checkpoint whenever one data chunk finishes.",
+    )
+
+    checkpoint.add_argument(
+        "--save_optimizer_state",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Include optimizer state in checkpoints.",
+    )
+
+    checkpoint.add_argument(
+        "--save_best_checkpoint",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Save whenever the monitored metric reaches a new best.",
+    )
+
+    checkpoint.add_argument(
+        "--best_checkpoint_metric",
+        type=str,
+        default="train_loss",
+    )
+
+    checkpoint.add_argument(
+        "--best_checkpoint_mode",
+        choices=["min", "max"],
+        default="min",
+    )
+
+    checkpoint.add_argument(
+        "--best_checkpoint_min_delta",
+        type=float,
+        default=0.0,
+        help=(
+            "Required improvement before replacing the best checkpoint."
+        ),
+    )
+
+    checkpoint.add_argument(
+        "--save_threshold_checkpoint",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Save when a metric reaches a configured threshold.",
+    )
+
+    checkpoint.add_argument(
+        "--threshold_checkpoint_metric",
+        type=str,
+        default="train_loss",
+    )
+
+    checkpoint.add_argument(
+        "--threshold_checkpoint_value",
+        type=float,
+        default=None,
+    )
+
+    checkpoint.add_argument(
+        "--threshold_checkpoint_mode",
+        choices=["min", "max"],
+        default="min",
+        help=(
+            "min saves when metric <= threshold; "
+            "max saves when metric >= threshold."
+        ),
+    )
+
+    checkpoint.add_argument(
+        "--threshold_checkpoint_once",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "Save only the first checkpoint that reaches the threshold."
+        ),
+    )
+
+    monitor = parser.add_argument_group(
+        "metrics and visualization"
+    )
+
+    monitor.add_argument(
+        "--metrics_every_steps",
+        type=int,
+        default=10,
+        help=(
+            "Calculate and write training metrics every N steps."
+        ),
+    )
+
+    monitor.add_argument(
+        "--metric_smoothing_window",
+        type=int,
+        default=20,
+        help=(
+            "Number of recent metric records used for smoothing."
+        ),
+    )
+
+    monitor.add_argument(
+        "--jsonl_metrics",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Append metrics to metrics/train_metrics.jsonl.",
+    )
+
+    monitor.add_argument(
+        "--tensorboard",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Write TensorBoard event files.",
+    )
+
+    monitor.add_argument(
+        "--save_plots",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Save metric plots as PNG files.",
+    )
+
+    monitor.add_argument(
+        "--plot_every_steps",
+        type=int,
+        default=500,
+        help=(
+            "Regenerate PNG plots every N steps. "
+            "0 means generate plots only when training ends."
+        ),
+    )
+
+    monitor.add_argument(
+        "--plot_metrics",
+        type=str,
+        default=(
+            "train_loss,perplexity,grad_norm,learning_rate,"
+            "tokens_per_second,samples_per_second,"
+            "gpu_allocated_gb,gpu_reserved_gb,"
+            "gpu_peak_allocated_gb"
+        ),
+        help="Comma-separated metrics saved as separate PNG files.",
+    )
+
+    monitor.add_argument(
+        "--max_plot_points",
+        type=int,
+        default=5000,
+        help=(
+            "Maximum number of points drawn in each PNG graph."
+        ),
+    )
+
+    monitor.add_argument(
+        "--log_parameter_norm",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Record the total model parameter norm.",
+    )
+
+    monitor.add_argument(
+        "--histogram_every_steps",
+        type=int,
+        default=0,
+        help=(
+            "Write parameter and gradient histograms to TensorBoard "
+            "every N steps. 0 disables histograms."
+        ),
+    )
 
     # Metrics and visualization
     metrics_every_steps: int
@@ -237,26 +407,35 @@ def build_parser() -> argparse.ArgumentParser:
 
 def _validate(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
     positive_names = (
-        "max_samples",
-        "max_vocab_size",
+        "total_documents",
+        "chunk_size",
         "context_length",
         "batch_size",
         "block_num",
         "embed_dim",
         "num_heads",
         "epochs",
-        "log_every",
+        "log_every_steps",
+        "metrics_every_steps",
+        "metric_smoothing_window",
+        "max_plot_points",
     )
     for name in positive_names:
         if getattr(args, name) <= 0:
             parser.error(f"--{name} must be positive")
 
-    nonnegative_names = (
+        nonnegative_names = (
         "shuffle_buffer",
         "num_workers",
-        "min_token_frequency",
-        "save_every",
         "max_steps",
+        "early_stop_step",
+        "early_stop_patience_steps",
+        "early_stop_min_delta",
+        "early_stop_warmup_steps",
+        "save_every_steps",
+        "best_checkpoint_min_delta",
+        "plot_every_steps",
+        "histogram_every_steps",
         "weight_decay",
         "dropout",
     )
