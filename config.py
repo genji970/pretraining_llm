@@ -4,21 +4,21 @@ import argparse
 from dataclasses import asdict, dataclass
 from typing import Sequence
 
-
 @dataclass(frozen=True)
 class TrainConfig:
-    """Single immutable source of truth for one training run."""
-
     dataset_name: str
     dataset_config: str | None
     dataset_split: str
     text_column: str
+
     total_documents: int
     chunk_size: int
+
     streaming: bool
     shuffle_buffer: int
     seed: int
 
+    tokenizer_name: str
     output_dir: str
 
     context_length: int
@@ -35,8 +35,6 @@ class TrainConfig:
     weight_decay: float
     max_grad_norm: float
     log_every: int
-    save_every: int
-    max_steps: int
     device: str
     resume_from: str | None
 
