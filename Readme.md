@@ -140,9 +140,11 @@ future plan 1) model parallelism 2) deepspeed 3) flashattention 4)Big data proce
 ### 2. GPU
 
 - **gpu use**
-    - allocate = torch.cuda.memory_allocated() / 1024**3 -> gb
-    - reserved = torch.cuda.memory_reserved() / 1024 **3
-    - peak = torch.cuda.max_memory_allocated() / 1024 ** 3
+      ```python
+      allocate = torch.cuda.memory_allocated() / 1024**3 -> gb
+      reserved = torch.cuda.memory_reserved() / 1024 **3
+      peak = torch.cuda.max_memory_allocated() / 1024 ** 3
+      ```
 
 - **When memory usage faces limitation**
     - gradient checkpointing
