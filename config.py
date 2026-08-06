@@ -120,7 +120,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     model = parser.add_argument_group("model")
-    model.add_argument("--context_length", type=int, default=256)
+    model.add_argument("--context_length", type=int, default=1024)
     model.add_argument("--block_num", type=int, default=8)
     model.add_argument("--embed_dim", type=int, default=512)
     model.add_argument("--num_heads", type=int, default=8)
